@@ -39,7 +39,11 @@ interface BaseResource extends Timestamped {
   readonly description: string;
   readonly photoUrls: readonly string[];
   readonly address: Address;
-  readonly location: GeoPoint;
+  /**
+   * Position approximative (arrondie à environ 1 km) déduite de l'adresse,
+   * `null` si l'adresse n'a pas pu être géocodée.
+   */
+  readonly location: GeoPoint | null;
   readonly status: ResourceStatus;
 }
 

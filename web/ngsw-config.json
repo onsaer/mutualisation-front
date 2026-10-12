@@ -53,6 +53,17 @@
         "maxAge": "1d",
         "timeout": "5s"
       }
+    },
+    {
+      "name": "photos",
+      "urls": [
+        "/api/photos/**"
+      ],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 200,
+        "maxAge": "30d"
+      }
     }
   ]
 }

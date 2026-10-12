@@ -68,12 +68,24 @@ const ACCESS_LABELS = {
           Impossible de charger l'annonce. Vérifiez votre connexion.
         </p>
       } @else if (item.value(); as r) {
-        @if (r.photoUrls[0]; as photo) {
-          <img
-            [src]="photo"
-            [alt]="r.title"
-            class="mb-4 aspect-video w-full rounded-2xl object-cover"
-          />
+        @if (r.photoUrls.length) {
+          <!-- Galerie : défilement horizontal avec arrêt sur chaque photo (balayage au doigt). -->
+          <div
+            class="-mx-4 mb-4 flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0"
+            role="region"
+            aria-label="Photos"
+            tabindex="0"
+          >
+            @for (photo of r.photoUrls; track photo; let i = $index) {
+              <img
+                [src]="photo"
+                [alt]="r.title + ' – photo ' + (i + 1) + ' sur ' + r.photoUrls.length"
+                [attr.loading]="i === 0 ? 'eager' : 'lazy'"
+                class="aspect-video shrink-0 snap-center rounded-2xl object-cover"
+                [class]="r.photoUrls.length > 1 ? 'w-[85%]' : 'w-full'"
+              />
+            }
+          </div>
         }
 
         <p class="mb-1 text-sm text-slate-500">

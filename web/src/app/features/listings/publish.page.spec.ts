@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { ResourceApi } from '../../core/api';
+import { PhotoApi, ResourceApi } from '../../core/api';
 import { AuthStore } from '../../core/auth/auth.store';
-import { MockResourceApi } from '../../core/api/mock/mock-apis';
+import { MockPhotoApi, MockResourceApi } from '../../core/api/mock/mock-apis';
 import { DEMO_PARTICULIER_USER } from '../../core/api/mock/mock-data';
 import PublishPage from './publish.page';
 
@@ -16,7 +16,11 @@ const type = (el: HTMLInputElement, value: string) => {
 describe('PublishPage', () => {
   it("bloque l'envoi d'un formulaire invalide puis publie une annonce valide", async () => {
     TestBed.configureTestingModule({
-      providers: [provideRouter([]), { provide: ResourceApi, useClass: MockResourceApi }],
+      providers: [
+        provideRouter([]),
+        { provide: ResourceApi, useClass: MockResourceApi },
+        { provide: PhotoApi, useClass: MockPhotoApi },
+      ],
     });
     TestBed.inject(AuthStore).setUser(DEMO_PARTICULIER_USER);
     const api = TestBed.inject(ResourceApi);

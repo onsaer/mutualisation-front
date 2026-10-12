@@ -3,3 +3,4 @@
 /coverage
 *.tsbuildinfo
 .env
+uploads/

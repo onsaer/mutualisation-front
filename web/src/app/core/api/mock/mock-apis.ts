@@ -16,6 +16,7 @@ import {
   UserId,
 } from '../../../shared/models';
 import { BookingApi } from '../booking-api';
+import { PhotoApi } from '../photo-api';
 import { ResourceApi, ResourceQuery } from '../resource-api';
 import { countPeriodDays, estimateRental, overlaps } from '../../../shared/utils/pricing';
 import { MOCK_BOOKINGS, MOCK_RESOURCES } from './mock-data';
@@ -52,8 +53,8 @@ export class MockResourceApi extends ResourceApi {
       ownerId: owner.id,
       ownerRole: owner.role,
       status: 'publiee',
-      // Le géocodage de l'adresse sera fait côté serveur.
-      location: { lat: 50.85, lng: 4.35 },
+      // Démo : pas de géocodage dans le navigateur (l'API le fait), l'annonce n'a pas de position.
+      location: null,
       createdAt: now,
       updatedAt: now,
     } as Resource;
@@ -172,5 +173,13 @@ export class MockBookingApi extends BookingApi {
     };
     this.data = this.data.map((b) => (b.id === id ? updated : b));
     return delay(updated);
+  }
+}
+
+/** Démo : la photo reste dans le navigateur le temps de la session. */
+@Injectable()
+export class MockPhotoApi extends PhotoApi {
+  override upload(photo: Blob) {
+    return delay(URL.createObjectURL(photo));
   }
 }

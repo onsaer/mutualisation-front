@@ -4,8 +4,10 @@ import { authInterceptor } from '../auth/auth.interceptor';
 import { BookingApi } from './booking-api';
 import { API_BASE_URL } from './http/http-api.utils';
 import { HttpBookingApi } from './http/http-booking-api';
+import { HttpPhotoApi } from './http/http-photo-api';
 import { HttpResourceApi } from './http/http-resource-api';
-import { MockBookingApi, MockResourceApi } from './mock/mock-apis';
+import { MockBookingApi, MockPhotoApi, MockResourceApi } from './mock/mock-apis';
+import { PhotoApi } from './photo-api';
 import { ResourceApi } from './resource-api';
 
 /**
@@ -22,10 +24,12 @@ export function provideApi(config: {
           { provide: API_BASE_URL, useValue: config.baseUrl },
           { provide: ResourceApi, useClass: HttpResourceApi },
           { provide: BookingApi, useClass: HttpBookingApi },
+          { provide: PhotoApi, useClass: HttpPhotoApi },
         ]
       : [
           { provide: ResourceApi, useClass: MockResourceApi },
           { provide: BookingApi, useClass: MockBookingApi },
+          { provide: PhotoApi, useClass: MockPhotoApi },
         ];
   return makeEnvironmentProviders([
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),

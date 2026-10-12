@@ -66,6 +66,31 @@ Une connexion via itsme marque le profil comme vérifié (`verifiedAt`) : le jet
 `identity_provider: "itsme"`, ajouté par le realm. Le nom du fournisseur se règle avec
 `OIDC_VERIFIED_IDP`.
 
+## Géolocalisation
+
+À la publication, l'adresse est géocodée (`src/geo/geocoder.ts`) par un service compatible
+Nominatim (OpenStreetMap) : l'adresse complète, puis le centre de la commune si la rue n'est pas
+trouvée. Les résultats sont mis en cache et les appels espacés d'une seconde (règles du service
+public). Si le service ne répond pas, l'annonce est publiée sans position (`location: null`).
+
+La position exacte reste en base. L'API ne publie qu'une **position arrondie à environ 1 km**,
+pour situer une annonce sans révéler le domicile de la personne. Le tri « Autour de moi » se fait
+dans le navigateur : la position de la personne n'est jamais envoyée au serveur.
+
+Pour la production : `GEOCODER_USER_AGENT` avec un contact, et à fort trafic une instance
+Nominatim hébergée ou un fournisseur commercial (même interface `Geocoder`).
+
+## Photos
+
+`POST /api/photos` vérifie que le fichier est bien une image (JPEG, PNG, WebP), la redresse,
+la réduit à 1600 px et la convertit en WebP (`sharp`). **Les métadonnées sont supprimées**,
+dont la position GPS des photos prises au téléphone. L'adresse renvoyée se met dans `photoUrls`
+à la publication ; les liens vers d'autres sites sont refusés.
+
+Stockage (`src/photos/photo-storage.ts`) : disque local (`uploads/`) en développement, stockage
+objet compatible S3 en production (Scaleway, OVHcloud… : hébergement européen), servi
+directement par le stockage ou un CDN. Variables dans `.env.example`.
+
 ## Endpoints
 
 | Méthode | Route | Accès | Rôle |
@@ -76,6 +101,8 @@ Une connexion via itsme marque le profil comme vérifié (`verifiedAt`) : le jet
 | GET | `/api/bookings?as=requester\|owner` | connecté | Mes demandes, ou les demandes reçues |
 | POST | `/api/bookings` | connecté | Réserver une période ou rejoindre un achat groupé |
 | PATCH | `/api/bookings/:id/status` | connecté | Confirmer, refuser, annuler… |
+| POST | `/api/photos` | connecté | Envoi d'une photo (multipart, champ `photo`, 10 Mo max) ; renvoie `{ url }` |
+| GET | `/api/photos/:fichier` | public | Photo (stockage local uniquement) |
 | GET | `/api/me` | connecté | Profil (`403 PROFILE_REQUIRED` s'il reste à créer) |
 | POST | `/api/me` | connecté, sans profil | Inscription (OpenID Connect uniquement) |
 
@@ -107,6 +134,8 @@ src/
 ├── db/          # schéma Drizzle, connexion, données de démo
 ├── auth/        # garde d'authentification (OpenID Connect ou démo)
 ├── users/       # profil et inscription
+├── geo/         # géocodage des adresses
+├── photos/      # envoi, réduction et stockage des photos
 ├── common/      # schémas Zod et pipe de validation
 ├── resources/   # annonces
 ├── bookings/    # réservations
