@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { INestApplication } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
@@ -12,6 +13,8 @@ export function configureApp(app: INestApplication): INestApplication {
 }
 
 if (process.env['VITEST'] === undefined) {
+  // Variables de `.env` s'il existe (copie de `.env.example`) ; celles du shell restent prioritaires.
+  if (existsSync('.env')) process.loadEnvFile('.env');
   const app = configureApp(await NestFactory.create(AppModule));
   await app.listen(process.env['PORT'] ?? 3000);
   console.log(`API prête sur ${await app.getUrl()}/api`);

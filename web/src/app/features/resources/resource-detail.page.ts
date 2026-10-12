@@ -150,7 +150,13 @@ const ACCESS_LABELS = {
           } @else if (blocker(); as reason) {
             <p class="mt-4 rounded-xl bg-slate-50 p-4 text-sm text-slate-700">{{ reason }}</p>
             @if (!auth.isAuthenticated()) {
-              <a appButton class="mt-3" routerLink="/connexion">Se connecter</a>
+              <a
+                appButton
+                class="mt-3"
+                routerLink="/connexion"
+                [queryParams]="{ retour: returnUrl }"
+                >Se connecter</a
+              >
             }
           } @else if (r.type === 'achat_groupe') {
             <div class="mt-4 flex items-center justify-between gap-4">
@@ -238,6 +244,10 @@ const ACCESS_LABELS = {
 export default class ResourceDetailPage {
   /** Paramètre de route `:resourceId` (liaison via `withComponentInputBinding`). */
   readonly resourceId = input.required<string>();
+  /** Après connexion, revenir sur cette annonce. */
+  protected get returnUrl(): string {
+    return `/ressources/${this.resourceId()}`;
+  }
 
   protected readonly auth = inject(AuthStore);
   private readonly resourceApi = inject(ResourceApi);

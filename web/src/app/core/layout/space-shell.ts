@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { AuthService } from '../auth/auth.service';
 import { NetworkStatusService } from '../pwa/network-status.service';
 
 export interface NavItem {
@@ -50,6 +51,15 @@ export interface NavItem {
           >
             + Publier
           </a>
+          <button
+            type="button"
+            class="rounded-lg px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-100"
+            aria-label="Se déconnecter"
+            (click)="logout()"
+          >
+            <span class="md:hidden" aria-hidden="true">⏻&#xFE0E;</span>
+            <span class="hidden md:inline">Déconnexion</span>
+          </button>
         </div>
       </div>
       @if (!network.online()) {
@@ -92,4 +102,9 @@ export class SpaceShell {
   readonly account = input('');
 
   protected readonly network = inject(NetworkStatusService);
+  private readonly auth = inject(AuthService);
+
+  protected logout(): void {
+    void this.auth.logout();
+  }
 }

@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { roleGuard } from './core/auth/role.guard';
+import { registrationGuard, roleGuard } from './core/auth/role.guard';
 
 /**
  * Routes racines.
@@ -11,6 +11,12 @@ import { roleGuard } from './core/auth/role.guard';
 export const routes: Routes = [
   { path: '', pathMatch: 'full', loadComponent: () => import('./features/home/home.page') },
   { path: 'connexion', loadComponent: () => import('./features/auth/pages/login.page') },
+  { path: 'auth/callback', loadComponent: () => import('./features/auth/pages/callback.page') },
+  {
+    path: 'inscription',
+    canMatch: [registrationGuard],
+    loadComponent: () => import('./features/auth/pages/registration.page'),
+  },
   {
     path: 'pro',
     canMatch: [roleGuard('pro')],

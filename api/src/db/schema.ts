@@ -43,6 +43,8 @@ const timestamps = {
 
 export const users = pgTable('users', {
   id: text('id').primaryKey(),
+  /** Identifiant chez le fournisseur d'identité (claim `sub` du jeton OpenID Connect). */
+  authSubject: text('auth_subject').unique(),
   role: userRole('role').notNull(),
   email: text('email').notNull().unique(),
   phone: text('phone'),
