@@ -16,10 +16,16 @@ Prérequis : Node.js 22.22.3 ou plus récent (ou Node 24).
 # Front seul, avec des données fictives
 cd web && npm install && npm start            # http://localhost:4200
 
-# Front + API (PostgreSQL en mémoire, données de démo)
-cd api && npm install --legacy-peer-deps && npm run start:dev   # terminal 1
-cd web && npm run start:api                                       # terminal 2
+# Front + API + connexion Keycloak (PostgreSQL en mémoire, données de démo)
+cd api && npm install --legacy-peer-deps
+docker compose up -d keycloak && cp .env.example .env   # décommenter OIDC_ISSUER
+npm run start:dev                                       # terminal 1
+cd web && npm run start:api                             # terminal 2
 ```
+
+Comptes de démo : `julie` / `julie` (particulier) et `atelier` / `atelier` (pro). La connexion
+itsme passe par Keycloak et demande un contrat partenaire itsme : voir
+[`api/README.md`](api/README.md#itsme).
 
 Documentation : [`web/ARCHITECTURE.md`](web/ARCHITECTURE.md) (front, étape par étape) et
 [`api/README.md`](api/README.md) (endpoints, règles métier, base de données).

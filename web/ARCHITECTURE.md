@@ -170,7 +170,7 @@ L'API est dans le dossier voisin `api/` (NestJS, Drizzle, PostgreSQL) : voir `ap
 
 - `core/api/provide-api.ts` choisit l'implémentation selon l'environnement : `mock` avec `npm start` (rien à lancer à côté), `http` avec `npm run start:api` et en production.
 - **Implémentations HTTP** (`core/api/http/`) : mêmes contrats `ResourceApi` et `BookingApi`, les pages n'ont pas changé. Les erreurs de l'API deviennent des `ApiError` dont le message en français s'affiche tel quel.
-- **Authentification de démonstration :** `core/auth/auth.interceptor.ts` envoie `Authorization: Bearer <id>`. À remplacer par le jeton OpenID Connect quand l'authentification réelle sera choisie.
+- **Authentification :** `core/auth/auth.interceptor.ts` envoie le jeton aux appels de l'API (voir l'étape 10).
 - **Proxy :** `proxy.conf.json` redirige `/api` vers `http://localhost:3000`, donc pas de CORS en développement.
 - **Hors-ligne :** `ngsw-config.json` met en cache les réponses `GET /api/resources` et `/api/bookings` (stratégie « fraîcheur » : réseau d'abord, cache si le réseau est absent ou répond en plus de 5 s).
 
@@ -181,7 +181,31 @@ cd api && npm install --legacy-peer-deps && npm run start:dev   # terminal 1
 cd web && npm run start:api                                          # terminal 2
 ```
 
-Tests : 44 tests Vitest côté front (17 fichiers), 10 côté API (dont 8 de bout en bout sur PGlite).
+Tests : 48 tests Vitest côté front (18 fichiers), 14 côté API (dont 12 de bout en bout sur PGlite, 4 sur la connexion OpenID Connect).
+
+## Étape 10 : connexion réelle (OpenID Connect, itsme)
+
+La connexion passe par **Keycloak**, qui gère les comptes e-mail et délègue à **itsme** (voir
+`api/README.md`, section Authentification). Le front utilise `oidc-client-ts` (flux
+« authorization code » avec PKCE, sans secret côté navigateur).
+
+- `core/auth/auth.config.ts` : mode `demo` (avec `npm start`, comptes de démonstration) ou `oidc` (avec `npm run start:api` et en production), défini dans `environments/`.
+- `core/auth/auth.service.ts` : `login({ via: 'itsme' | 'keycloak' | 'inscription' })` redirige vers Keycloak ; `itsme` ajoute `kc_idp_hint=itsme` pour aller directement chez itsme, `inscription` ouvre la création de compte (`prompt=create`). Au retour, `completeLogin()` charge le profil via `GET /api/me`. La session est gardée dans l'onglet (`sessionStorage`), renouvelée en silence, et reprise au rechargement par `provideAppInitializer`.
+- **Pages :** `/connexion` (itsme, e-mail, créer un compte ; `?retour=` pour revenir à une annonce), `/auth/callback` (retour de Keycloak), `/inscription` (profil particulier ou pro, prérempli avec le nom transmis par itsme).
+- **Gardes :** `roleGuard` envoie vers `/inscription` une personne connectée sans profil ; `registrationGuard` protège l'inscription.
+- **Déconnexion :** bouton dans l'en-tête des espaces ; ferme aussi la session Keycloak.
+- L'intercepteur n'ajoute le jeton qu'aux appels vers `/api`.
+
+Pour essayer :
+
+```bash
+cd api && docker compose up -d keycloak && cp .env.example .env   # décommenter OIDC_ISSUER
+npm run start:dev                                                    # terminal 1
+cd web && npm run start:api                                          # terminal 2
+```
+
+Comptes : `julie` / `julie` (particulier) et `atelier` / `atelier` (pro), ou « Créer un compte ».
+Captures : `docs/connexion.png`, `docs/connexion-keycloak.png`, `docs/inscription.png`.
 
 ## Points à valider avant l'étape suivante
 

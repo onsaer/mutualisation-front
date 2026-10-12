@@ -21,7 +21,7 @@ const dateRange = z
   .object({ start: isoDateTime, end: isoDateTime })
   .refine((r) => r.start < r.end, { message: 'La fin doit suivre le début.' });
 
-const address = z.object({
+export const addressSchema = z.object({
   street: z.string().trim().min(1),
   number: z.string().trim(),
   box: z.string().trim().optional(),
@@ -47,7 +47,7 @@ const base = {
     .array(userRoleSchema)
     .min(1)
     .refine((a) => new Set(a).size === a.length, 'Public en double.'),
-  address,
+  address: addressSchema,
 };
 
 export const newResourceSchema = z.discriminatedUnion('type', [
@@ -126,3 +126,37 @@ export const statusChangeSchema = z.object({
 export const bookingListQuerySchema = z.object({
   as: z.enum(['requester', 'owner']).default('requester'),
 });
+
+const profileBase = {
+  displayName: z.string().trim().min(2).max(60),
+  phone: z
+    .string()
+    .regex(/^\+32\d{8,9}$/, 'Numéro belge au format +32…')
+    .optional(),
+  address: addressSchema,
+  preferredLanguage: z.enum(['fr', 'nl', 'de', 'en']).default('fr'),
+};
+
+/** Création du profil après la première connexion (l'e-mail vient du jeton). */
+export const registrationSchema = z.discriminatedUnion('role', [
+  z.object({
+    ...profileBase,
+    role: z.literal('particulier'),
+    firstName: z.string().trim().min(1).max(60),
+    lastName: z.string().trim().min(1).max(60),
+  }),
+  z.object({
+    ...profileBase,
+    role: z.literal('pro'),
+    company: z.object({
+      legalName: z.string().trim().min(2).max(120),
+      vatNumber: z
+        .string()
+        .transform((v) => v.replace(/[\s.]/g, '').toUpperCase())
+        .pipe(z.string().regex(/^BE[01]\d{9}$/, 'Numéro BCE belge, ex. BE0123456789.')),
+      size: z.enum(['tpe', 'pme', 'commercant']),
+      naceCode: z.string().trim().optional(),
+    }),
+  }),
+]);
+export type RegistrationInput = z.infer<typeof registrationSchema>;

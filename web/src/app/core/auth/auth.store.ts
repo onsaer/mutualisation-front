@@ -3,7 +3,7 @@ import { User, UserRole } from '../../shared/models';
 
 /**
  * État d'authentification global, basé sur les Signals.
- * La connexion réelle (API, tokens) sera branchée dans une étape ultérieure.
+ * Alimenté par `AuthService` (connexion OpenID Connect ou comptes de démonstration).
  */
 @Injectable({ providedIn: 'root' })
 export class AuthStore {

@@ -12,6 +12,8 @@ export class ApiError extends Error {
   constructor(
     message: string,
     readonly status: number,
+    /** Code métier éventuel, ex. `PROFILE_REQUIRED`. */
+    readonly code?: string,
   ) {
     super(message);
   }
@@ -26,7 +28,8 @@ export async function request<T>(call: Observable<T>): Promise<T> {
     return await firstValueFrom(call);
   } catch (e) {
     if (e instanceof HttpErrorResponse) {
-      const message = (e.error as { message?: unknown } | null)?.message;
+      const body = e.error as { message?: unknown; code?: unknown } | null;
+      const message = body?.message;
       throw new ApiError(
         typeof message === 'string'
           ? message
@@ -34,6 +37,7 @@ export async function request<T>(call: Observable<T>): Promise<T> {
             ? 'Serveur injoignable. Vérifiez votre connexion.'
             : 'Une erreur est survenue. Réessayez.',
         e.status,
+        typeof body?.code === 'string' ? body.code : undefined,
       );
     }
     throw e;

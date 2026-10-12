@@ -24,12 +24,47 @@ DATABASE_URL=postgres://mutualisation:mutualisation@localhost:5432/mutualisation
 Les migrations (`drizzle/`) s'appliquent au démarrage. Après une modification de
 `src/db/schema.ts` : `npm run db:generate`.
 
-## Authentification (démonstration)
+## Authentification
 
-`Authorization: Bearer <identifiant>` avec un compte de démo : `u-pro-1` (Atelier Dumont SRL),
-`u-pro-2`, `u-part-1` (Julie), `u-part-2`, `u-part-3`.
-**À remplacer avant la production** par OpenID Connect (itsme, Keycloak, Auth0…) : voir
-`src/auth/auth.ts`.
+Deux modes, choisis par les variables d'environnement (`src/auth/auth.config.ts`) :
+
+- **OpenID Connect** dès que `OIDC_ISSUER` est défini. Le front obtient un jeton d'accès auprès de
+  Keycloak (flux « authorization code » avec PKCE). L'API vérifie sa signature (clés publiques
+  JWKS), l'émetteur, l'audience `mutualisation-api` et l'expiration, puis retrouve le profil par
+  le `sub` du jeton (colonne `users.auth_subject`). C'est le seul mode accepté en production.
+- **Démonstration** sinon : `Authorization: Bearer <identifiant>` avec un compte de démo :
+  `u-pro-1` (Atelier Dumont SRL), `u-pro-2`, `u-part-1` (Julie), `u-part-2`, `u-part-3`.
+
+### Keycloak en local
+
+```bash
+docker compose up -d keycloak         # http://localhost:8080 (admin / admin)
+cp .env.example .env                  # puis décommenter OIDC_ISSUER
+npm run start:dev
+```
+
+Le realm `mutualisation` (`keycloak/mutualisation-realm.json`) est importé au premier démarrage :
+client public `mutualisation-web` (PKCE), création de compte ouverte, interface en français,
+et deux comptes de démo liés aux profils existants : `julie` / `julie` (particulier) et
+`atelier` / `atelier` (pro).
+
+### Inscription
+
+Une personne qui se connecte pour la première fois n'a pas encore de profil : l'API répond
+`403` avec `code: "PROFILE_REQUIRED"` et le front ouvre `/inscription`. `POST /api/me` crée le
+profil (particulier ou pro, avec numéro BCE). L'e-mail vient du jeton et n'est pas saisi.
+
+### itsme
+
+itsme s'ajoute dans Keycloak comme **fournisseur d'identité** (Identity providers, OpenID
+Connect v1.0) avec l'alias `itsme` ; le bouton « Se connecter avec itsme » du front envoie
+`kc_idp_hint=itsme` pour aller directement chez itsme. Il faut pour cela un contrat partenaire
+itsme, qui fournit les identifiants et l'adresse de configuration (environnement de test puis
+de production). Tant qu'il n'est pas configuré, le bouton mène à l'écran de connexion Keycloak.
+
+Une connexion via itsme marque le profil comme vérifié (`verifiedAt`) : le jeton porte
+`identity_provider: "itsme"`, ajouté par le realm. Le nom du fournisseur se règle avec
+`OIDC_VERIFIED_IDP`.
 
 ## Endpoints
 
@@ -41,7 +76,8 @@ Les migrations (`drizzle/`) s'appliquent au démarrage. Après une modification 
 | GET | `/api/bookings?as=requester\|owner` | connecté | Mes demandes, ou les demandes reçues |
 | POST | `/api/bookings` | connecté | Réserver une période ou rejoindre un achat groupé |
 | PATCH | `/api/bookings/:id/status` | connecté | Confirmer, refuser, annuler… |
-| GET | `/api/me` | connecté | Profil |
+| GET | `/api/me` | connecté | Profil (`403 PROFILE_REQUIRED` s'il reste à créer) |
+| POST | `/api/me` | connecté, sans profil | Inscription (OpenID Connect uniquement) |
 
 Erreurs : `400` données invalides (avec `issues`), `401` non connecté, `403` action interdite,
 `404` introuvable, `409` conflit (dates prises, transition impossible, achat clôturé).
@@ -69,7 +105,8 @@ npx vitest run --config vitest.config.e2e.ts   # tests de bout en bout (PGlite)
 src/
 ├── domain/      # modèles partagés avec le front (copie) + règles de prix
 ├── db/          # schéma Drizzle, connexion, données de démo
-├── auth/        # garde d'authentification (démo)
+├── auth/        # garde d'authentification (OpenID Connect ou démo)
+├── users/       # profil et inscription
 ├── common/      # schémas Zod et pipe de validation
 ├── resources/   # annonces
 ├── bookings/    # réservations

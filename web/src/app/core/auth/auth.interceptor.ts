@@ -1,13 +1,14 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { AuthStore } from './auth.store';
+import { API_BASE_URL } from '../api/http/http-api.utils';
+import { AuthService } from './auth.service';
 
 /**
- * Ajoute l'en-tête d'authentification aux appels de l'API.
- * Démonstration : l'identifiant utilisateur sert de jeton. Avec OpenID Connect,
- * on enverra ici le jeton d'accès (JWT) obtenu à la connexion.
+ * Ajoute le jeton d'accès aux appels de l'API (et seulement à ceux-là).
+ * OpenID Connect : jeton JWT de Keycloak. Démo : identifiant du compte de démonstration.
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const user = inject(AuthStore).user();
-  return next(user ? req.clone({ setHeaders: { Authorization: `Bearer ${user.id}` } }) : req);
+  if (!req.url.startsWith(inject(API_BASE_URL))) return next(req);
+  const token = inject(AuthService).accessToken();
+  return next(token ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : req);
 };
