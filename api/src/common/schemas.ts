@@ -42,7 +42,8 @@ const pricing = z.discriminatedUnion('mode', [
 const base = {
   title: z.string().trim().min(5).max(80),
   description: z.string().trim().max(1000).default(''),
-  photoUrls: z.array(z.url()).max(10).default([]),
+  /** Adresses renvoyées par `POST /api/photos` (vérifiées par le service). */
+  photoUrls: z.array(z.string().max(500)).max(10).default([]),
   audience: z
     .array(userRoleSchema)
     .min(1)

@@ -13,7 +13,10 @@ export class ResourcesController {
   /** `GET /api/resources?type=materiel&audience=particulier&ownerRole=pro` */
   @Public()
   @Get()
-  list(@Query(new ZodPipe(resourceQuerySchema)) query: ReturnType<typeof resourceQuerySchema.parse>) {
+  list(
+    @Query(new ZodPipe(resourceQuerySchema))
+    query: ReturnType<typeof resourceQuerySchema.parse>,
+  ) {
     return this.service.list(query);
   }
 
@@ -24,7 +27,10 @@ export class ResourcesController {
   }
 
   @Post()
-  create(@Body(new ZodPipe(newResourceSchema)) body: NewResourceInput, @CurrentUser() user: User) {
+  create(
+    @Body(new ZodPipe(newResourceSchema)) body: NewResourceInput,
+    @CurrentUser() user: User,
+  ) {
     return this.service.create(body, user);
   }
 }

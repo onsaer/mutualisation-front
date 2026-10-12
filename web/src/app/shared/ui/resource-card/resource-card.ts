@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 import { RouterLink } from '@angular/router';
 import { Resource, ResourceType } from '../../models';
 import { daysUntil, formatMoney, formatPricing } from '../../utils/format';
+import { formatDistance } from '../../utils/geo';
 
 const TYPE_LABELS: Record<ResourceType, string> = {
   materiel: 'Matériel',
@@ -48,7 +49,12 @@ const TYPE_BADGES: Record<ResourceType, string> = {
 
       <div class="flex flex-1 flex-col gap-1 p-3">
         <h3 class="line-clamp-2 font-semibold text-slate-900">{{ r.title }}</h3>
-        <p class="text-sm text-slate-500">{{ r.address.municipality }}</p>
+        <p class="text-sm text-slate-500">
+          {{ r.address.municipality }}
+          @if (distance(); as d) {
+            <span class="text-emerald-700">· {{ d }}</span>
+          }
+        </p>
 
         <div class="mt-auto pt-2">
           @switch (r.type) {
@@ -88,6 +94,13 @@ const TYPE_BADGES: Record<ResourceType, string> = {
 })
 export class ResourceCard {
   readonly resource = input.required<Resource>();
+  /** Distance depuis la position de la personne, si « Autour de moi » est actif. */
+  readonly distanceKm = input<number | null>(null);
+
+  protected readonly distance = computed(() => {
+    const km = this.distanceKm();
+    return km === null ? null : formatDistance(km);
+  });
 
   protected readonly typeLabel = computed(() => TYPE_LABELS[this.resource().type]);
   protected readonly badgeClass = computed(() => TYPE_BADGES[this.resource().type]);

@@ -31,6 +31,8 @@ export interface ListingDraft {
   type: ResourceType;
   title: string;
   description: string;
+  /** Adresses renvoyées par l'envoi de photos ; la première sert de couverture. */
+  photoUrls: readonly string[];
   audiencePro: boolean;
   audienceParticulier: boolean;
   street: string;
@@ -68,6 +70,7 @@ export const emptyDraft = (user: User | null, type: ResourceType = 'materiel'): 
   type,
   title: '',
   description: '',
+  photoUrls: [],
   audiencePro: user?.role !== 'particulier',
   audienceParticulier: user?.role !== 'pro',
   street: user?.address.street ?? '',
@@ -183,7 +186,7 @@ export const toNewResource = (d: ListingDraft): NewResource => {
   const base = {
     title: d.title.trim(),
     description: d.description.trim(),
-    photoUrls: [],
+    photoUrls: [...d.photoUrls],
     audience: audience as [UserRole, ...UserRole[]],
     address: {
       street: d.street.trim(),

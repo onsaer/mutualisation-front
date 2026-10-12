@@ -1,7 +1,16 @@
-import type { Booking, IsoDateTime, Resource, User } from '../domain/index.js';
+import type { Booking, GeoPoint, IsoDateTime, Resource, User } from '../domain/index.js';
 import type { BookingRow, ResourceRow, UserRow } from './schema.js';
 
 const iso = (d: Date) => d.toISOString() as IsoDateTime;
+
+/**
+ * Position publiée : arrondie au centième de degré (environ 1 km), pour situer une annonce
+ * sans révéler le domicile de la personne qui la publie.
+ */
+const approximate = (lat: number | null, lng: number | null): GeoPoint | null =>
+  lat === null || lng === null
+    ? null
+    : { lat: Math.round(lat * 100) / 100, lng: Math.round(lng * 100) / 100 };
 
 /** Ligne SQL → modèle du domaine (le même que celui du front). */
 export const toResource = (r: ResourceRow): Resource =>
@@ -16,7 +25,7 @@ export const toResource = (r: ResourceRow): Resource =>
     description: r.description,
     photoUrls: r.photoUrls,
     address: r.address,
-    location: { lat: r.lat, lng: r.lng },
+    location: approximate(r.lat, r.lng),
     status: r.status,
     createdAt: iso(r.createdAt),
     updatedAt: iso(r.updatedAt),
@@ -104,8 +113,8 @@ export const splitResource = (r: Resource) => {
     photoUrls: [...photoUrls],
     address,
     postalCode: address.postalCode,
-    lat: location.lat,
-    lng: location.lng,
+    lat: location?.lat ?? null,
+    lng: location?.lng ?? null,
     status,
     details,
     createdAt: new Date(createdAt),

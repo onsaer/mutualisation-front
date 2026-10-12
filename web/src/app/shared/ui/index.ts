@@ -5,3 +5,4 @@ export * from './resource-card/resource-card';
 export * from './resource-grid/resource-grid';
 export * from './search-field/search-field';
 export * from './field-errors/field-errors';
+export * from './photo-picker/photo-picker';

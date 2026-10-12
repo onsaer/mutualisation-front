@@ -181,7 +181,7 @@ cd api && npm install --legacy-peer-deps && npm run start:dev   # terminal 1
 cd web && npm run start:api                                          # terminal 2
 ```
 
-Tests : 48 tests Vitest côté front (18 fichiers), 14 côté API (dont 12 de bout en bout sur PGlite, 4 sur la connexion OpenID Connect).
+Tests : 53 tests Vitest côté front (20 fichiers), 21 côté API (dont 17 de bout en bout sur PGlite).
 
 ## Étape 10 : connexion réelle (OpenID Connect, itsme)
 
@@ -206,6 +206,16 @@ cd web && npm run start:api                                          # terminal 
 
 Comptes : `julie` / `julie` (particulier) et `atelier` / `atelier` (pro), ou « Créer un compte ».
 Captures : `docs/connexion.png`, `docs/connexion-keycloak.png`, `docs/inscription.png`.
+
+## Étape 11 : géolocalisation et photos
+
+- **« Autour de moi »** (`shared/ui/resource-grid`, `core/geo/nearby.service.ts`) : sur toutes les listes, un bouton demande la position au navigateur, trie les annonces par distance et filtre par rayon (5, 10, 25 km ou toute distance). La distance s'affiche sur chaque carte (`shared/utils/geo.ts`, « à moins de 2 km » en dessous de 2 km, car les positions publiées sont arrondies à environ 1 km). La position reste dans le navigateur.
+- **Photos** (`shared/ui/photo-picker`) : dans le formulaire de publication, choix dans la galerie ou prise de vue, aperçu, envoi immédiat dans l'ordre choisi, suppression et choix de la couverture (10 maximum). Les photos lourdes sont réduites dans le navigateur avant l'envoi (`shared/utils/image.ts`) pour économiser les données mobiles. Le bouton « Publier » attend la fin des envois.
+- **Page de détail** : galerie à faire défiler au doigt.
+- **Hors-ligne** : les photos déjà vues restent en cache 30 jours (`ngsw-config.json`).
+- `PhotoApi` suit le même principe que les autres API : `MockPhotoApi` (photo gardée dans le navigateur) avec `npm start`, `HttpPhotoApi` avec l'API.
+
+Captures : `docs/photos-formulaire.png`, `docs/autour-de-moi.png`, `docs/galerie.png`.
 
 ## Points à valider avant l'étape suivante
 

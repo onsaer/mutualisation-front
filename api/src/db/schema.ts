@@ -94,8 +94,9 @@ export const resources = pgTable(
     photoUrls: text('photo_urls').array().notNull().default(sql`'{}'`),
     address: jsonb('address').$type<Address>().notNull(),
     postalCode: text('postal_code').notNull(),
-    lat: doublePrecision('lat').notNull(),
-    lng: doublePrecision('lng').notNull(),
+    /** Position exacte issue du géocodage (`null` si l'adresse n'a pas été trouvée). */
+    lat: doublePrecision('lat'),
+    lng: doublePrecision('lng'),
     status: resourceStatus('status').notNull().default('publiee'),
     /** Champs spécifiques au type (tarif, surface, seuil d'achat groupé…). */
     details: jsonb('details').$type<ResourceDetails>().notNull(),

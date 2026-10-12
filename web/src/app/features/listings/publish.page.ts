@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ResourceApi } from '../../core/api';
 import { AuthStore } from '../../core/auth/auth.store';
 import { EspaceKind, Pricing, ResourceType, UserRole } from '../../shared/models';
-import { Button, FieldErrors } from '../../shared/ui';
+import { Button, FieldErrors, PhotoPicker } from '../../shared/ui';
 import { regionFromPostalCode } from '../../shared/utils/belgium';
 import { emptyDraft, listingSchema, toNewResource } from './listing-draft';
 
@@ -59,7 +59,7 @@ const SECTION = 'space-y-4 rounded-2xl border border-slate-200 bg-white p-4';
  */
 @Component({
   selector: 'app-publish-page',
-  imports: [FormField, FieldErrors, Button],
+  imports: [FormField, FieldErrors, Button, PhotoPicker],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <h1 class="text-2xl font-semibold">Publier une annonce</h1>
@@ -299,6 +299,17 @@ const SECTION = 'space-y-4 rounded-2xl border border-slate-200 bg-white p-4';
         <app-field-errors [field]="f.audienceParticulier" />
       </section>
 
+      <section [class]="section" aria-labelledby="s-photos">
+        <h2 id="s-photos" class="font-semibold">
+          Photos <span class="text-sm font-normal text-slate-400">(facultatif)</span>
+        </h2>
+        <app-photo-picker
+          [urls]="draft().photoUrls"
+          (urlsChange)="setPhotos($event)"
+          [(uploading)]="uploadingPhotos"
+        />
+      </section>
+
       @if (serverError()) {
         <p role="alert" class="rounded-xl bg-red-50 p-3 text-sm text-red-800">
           {{ serverError() }}
@@ -307,8 +318,15 @@ const SECTION = 'space-y-4 rounded-2xl border border-slate-200 bg-white p-4';
         <p role="alert" class="text-sm text-red-700">Corrigez les champs signalés en rouge.</p>
       }
 
-      <button appButton type="submit" size="lg" [fullWidth]="true" [loading]="f().submitting()">
-        Publier l'annonce
+      <button
+        appButton
+        type="submit"
+        size="lg"
+        [fullWidth]="true"
+        [loading]="f().submitting()"
+        [disabled]="uploadingPhotos()"
+      >
+        {{ uploadingPhotos() ? 'Envoi des photos…' : "Publier l'annonce" }}
       </button>
     </form>
   `,
@@ -347,6 +365,11 @@ export default class PublishPage {
       })[this.type()],
   );
   protected readonly serverError = signal<string | null>(null);
+  protected readonly uploadingPhotos = signal(false);
+
+  protected setPhotos(photoUrls: readonly string[]): void {
+    this.draft.update((d) => ({ ...d, photoUrls }));
+  }
 
   protected async publish(event: Event): Promise<void> {
     event.preventDefault();
