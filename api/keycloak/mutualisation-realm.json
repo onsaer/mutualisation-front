@@ -1,0 +1,81 @@
+{
+  "realm": "mutualisation",
+  "displayName": "Mutualisation",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "rememberMe": true,
+  "internationalizationEnabled": true,
+  "supportedLocales": ["fr", "nl", "de", "en"],
+  "defaultLocale": "fr",
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 1800,
+  "clients": [
+    {
+      "clientId": "mutualisation-web",
+      "name": "Mutualisation (application web)",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["http://localhost:4200/*"],
+      "webOrigins": ["http://localhost:4200"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:4200/*"
+      },
+      "protocolMappers": [
+        {
+          "name": "audience-api",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.custom.audience": "mutualisation-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        },
+        {
+          "name": "fournisseur-identite",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usersessionmodel-note-mapper",
+          "config": {
+            "user.session.note": "identity_provider",
+            "claim.name": "identity_provider",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "id": "b8f5c1d2-4e3a-4f6b-9c7d-1a2b3c4d5e01",
+      "username": "julie",
+      "email": "julie.peeters@example.be",
+      "emailVerified": true,
+      "firstName": "Julie",
+      "lastName": "Peeters",
+      "enabled": true,
+      "credentials": [{ "type": "password", "value": "julie", "temporary": false }]
+    },
+    {
+      "id": "b8f5c1d2-4e3a-4f6b-9c7d-1a2b3c4d5e02",
+      "username": "atelier",
+      "email": "contact@atelier-dumont.be",
+      "emailVerified": true,
+      "firstName": "Atelier",
+      "lastName": "Dumont",
+      "enabled": true,
+      "credentials": [{ "type": "password", "value": "atelier", "temporary": false }]
+    }
+  ]
+}

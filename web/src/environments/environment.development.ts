@@ -1,5 +1,8 @@
-/** `ng serve` : données fictives, aucune API nécessaire. `npm run start:api` utilise l'API. */
+import type { AuthConfig } from '../app/core/auth/auth.config';
+
+/** `ng serve` : données fictives et comptes de démo, aucun serveur nécessaire. */
 export const environment = {
   apiMode: 'mock' as 'mock' | 'http',
   apiBaseUrl: '/api',
+  auth: { mode: 'demo' } as AuthConfig,
 };

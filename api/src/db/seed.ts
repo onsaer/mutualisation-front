@@ -14,6 +14,15 @@ import {
 
 const now = DEMO_PRO_USER.createdAt;
 
+/**
+ * Comptes Keycloak de démonstration (`keycloak/mutualisation-realm.json`) liés aux profils
+ * de démo : se connecter avec « julie » ou « atelier » ouvre ces profils.
+ */
+export const DEMO_AUTH_SUBJECTS: Record<string, string> = {
+  [DEMO_PARTICULIER_USER.id]: 'b8f5c1d2-4e3a-4f6b-9c7d-1a2b3c4d5e01',
+  [DEMO_PRO_USER.id]: 'b8f5c1d2-4e3a-4f6b-9c7d-1a2b3c4d5e02',
+};
+
 /** Autres comptes référencés par les annonces de démonstration. */
 const OTHER_USERS: User[] = [
   {
@@ -44,6 +53,7 @@ const OTHER_USERS: User[] = [
 
 const userRow = (u: User) => ({
   id: u.id,
+  authSubject: DEMO_AUTH_SUBJECTS[u.id] ?? null,
   role: u.role,
   email: u.email,
   phone: u.phone ?? null,

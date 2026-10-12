@@ -1,4 +1,4 @@
-# PostgreSQL local pour le développement : `docker compose up -d`
+# Services locaux pour le développement : `docker compose up -d`
 services:
   postgres:
     image: postgres:17
@@ -10,5 +10,19 @@ services:
       - '5432:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  # Fournisseur d'identité (OpenID Connect). Console d'administration : http://localhost:8080
+  # (admin / admin). Le realm `mutualisation` et ses comptes de démo sont importés au démarrage.
+  keycloak:
+    image: keycloak/keycloak:26.4
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./keycloak:/opt/keycloak/data/import:ro
+
 volumes:
   pgdata:
