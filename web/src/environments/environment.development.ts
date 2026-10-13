@@ -5,5 +5,6 @@ export const environment = {
   apiMode: 'mock' as 'mock' | 'http',
   apiBaseUrl: '/api',
   auth: { mode: 'demo' } as AuthConfig,
-  hashRouting: false,
+  /** `path` : adresses classiques ; `memory` : démo dans un cadre isolé (voir MemoryLocationStrategy). */
+  routing: 'path' as 'path' | 'memory',
 };
