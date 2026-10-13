@@ -14,5 +14,6 @@ export const environment = {
     clientId: 'mutualisation-web',
     itsmeHint: 'itsme',
   } as AuthConfig,
-  hashRouting: false,
+  /** `path` : adresses classiques ; `memory` : démo dans un cadre isolé (voir MemoryLocationStrategy). */
+  routing: 'path' as 'path' | 'memory',
 };
