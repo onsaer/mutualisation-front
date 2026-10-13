@@ -14,4 +14,5 @@ export const environment = {
     clientId: 'mutualisation-web',
     itsmeHint: 'itsme',
   } as AuthConfig,
+  hashRouting: false,
 };

@@ -21,19 +21,14 @@
       "installMode": "lazy",
       "updateMode": "prefetch",
       "resources": {
-        "files": [
-          "/**/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"
-        ]
+        "files": ["/**/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"]
       }
     }
   ],
   "dataGroups": [
     {
       "name": "api-annonces",
-      "urls": [
-        "/api/resources",
-        "/api/resources/**"
-      ],
+      "urls": ["/api/resources", "/api/resources/**"],
       "cacheConfig": {
         "strategy": "freshness",
         "maxSize": 100,
@@ -43,10 +38,7 @@
     },
     {
       "name": "api-reservations",
-      "urls": [
-        "/api/bookings",
-        "/api/me"
-      ],
+      "urls": ["/api/bookings", "/api/me"],
       "cacheConfig": {
         "strategy": "freshness",
         "maxSize": 20,
@@ -56,9 +48,7 @@
     },
     {
       "name": "photos",
-      "urls": [
-        "/api/photos/**"
-      ],
+      "urls": ["/api/photos/**"],
       "cacheConfig": {
         "strategy": "performance",
         "maxSize": 200,
